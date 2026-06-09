@@ -1,0 +1,33 @@
+{
+  "name": "agentpay-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "deploy:contracts": "hardhat run scripts/deploy.ts --network fuji"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@x402/core": "^2.15.0",
+    "@x402/evm": "^2.15.0",
+    "@x402/fetch": "^2.15.0",
+    "@x402/next": "^2.15.0",
+    "dotenv": "latest",
+    "ethers": "^6.13.5",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "viem": "^2.52.2"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "hardhat": "^2.22.19",
+    "typescript": "latest"
+  }
+}

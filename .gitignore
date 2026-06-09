@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+dist/
+
+# hardhat
+artifacts/
+cache/
+coverage/
+
+# environment files
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+
+# macOS
+.DS_Store
+
+# editors
+.vscode/
+.idea/
+
+docs/
