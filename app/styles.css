@@ -4761,6 +4761,35 @@ body {
   border-radius: 12px;
 }
 
+.inline-proof-layout .pro-composer,
+.inline-proof-layout .premium-composer {
+  padding-top: 12px;
+}
+
+.inline-proof-layout .input-row {
+  grid-template-columns: minmax(0, 1fr) 46px;
+  align-items: end;
+}
+
+.inline-proof-layout .input-row button,
+.inline-proof-layout .premium-composer .input-row button {
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+}
+
+.inline-proof-layout.is-empty .input-row button,
+.inline-proof-layout.is-empty .premium-composer .input-row button {
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+}
+
 @media (max-width: 720px) {
   .inline-proof-layout.is-empty .premium-conversation {
     padding: 18px 14px 230px;

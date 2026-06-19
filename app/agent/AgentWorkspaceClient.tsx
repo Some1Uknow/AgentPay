@@ -78,6 +78,12 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
     }
   }
 
+  function handleComposerKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    event.preventDefault();
+    runAgent();
+  }
+
   useEffect(() => { loadAgents(); }, []);
 
   const activePolicy = run?.allowancePolicy || policy;
@@ -125,13 +131,7 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
         </div>
 
         <footer className="pro-composer premium-composer">
-          <div className="composer-policy-row"><button type="button" onClick={() => setPolicyOpen(true)}><Settings size={14} /> Spend rules: {formatUsdc(policy.maxBudgetAtomic)} · rep {policy.minReputation}/5 · {policy.maxTools} APIs</button></div>
-          <div className="prompt-chips">
-            <button onClick={() => setTask(defaultTask)}>Safest yield</button>
-            <button onClick={() => setTask('Compare paid API reputation before spending.')}>Compare trust</button>
-            <button onClick={() => setTask('Show x402 payment and reputation proof.')}>Show proof</button>
-          </div>
-          <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} aria-label="Agent instruction" /><button onClick={() => runAgent()} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>
+          <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} onKeyDown={handleComposerKeyDown} aria-label="Agent instruction" /><button onClick={() => runAgent()} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>
         </footer>
       </section>
 
