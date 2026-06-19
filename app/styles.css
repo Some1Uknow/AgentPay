@@ -4684,10 +4684,16 @@ body {
 }
 
 .inline-proof-layout.is-empty .premium-conversation {
-  position: relative;
   display: grid;
   place-items: center;
-  padding: 24px 24px 220px;
+  padding: 24px;
+}
+
+.empty-chat-center {
+  width: min(760px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 20px;
 }
 
 .inline-proof-layout.is-empty .console-start {
@@ -4708,28 +4714,8 @@ body {
   font-size: 0.92rem;
 }
 
-.inline-proof-layout.is-empty .pro-composer,
-.inline-proof-layout.is-empty .premium-composer {
-  position: absolute;
-  left: 50%;
-  bottom: calc(50% - 185px);
-  z-index: 3;
+.empty-chat-center .input-row {
   width: min(760px, calc(100% - 48px));
-  transform: translateX(-50%);
-  padding: 0;
-  border-top: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.inline-proof-layout.is-empty .composer-policy-row {
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-.inline-proof-layout.is-empty .prompt-chips {
-  justify-content: center;
-  margin-bottom: 12px;
 }
 
 .inline-proof-layout.is-empty .input-row {
@@ -4792,12 +4778,12 @@ body {
 
 @media (max-width: 720px) {
   .inline-proof-layout.is-empty .premium-conversation {
-    padding: 18px 14px 230px;
-    place-items: start center;
+    padding: 18px 14px;
+    place-items: center;
   }
 
   .inline-proof-layout.is-empty .console-start {
-    margin-top: 36px;
+    margin-top: 0;
   }
 
   .inline-proof-layout.is-empty .console-start h2 {
@@ -4805,14 +4791,7 @@ body {
     font-size: clamp(1.85rem, 9vw, 2.8rem);
   }
 
-  .inline-proof-layout.is-empty .pro-composer,
-  .inline-proof-layout.is-empty .premium-composer {
-    bottom: 22px;
+  .empty-chat-center .input-row {
     width: calc(100% - 24px);
-  }
-
-  .inline-proof-layout.is-empty .prompt-chips,
-  .inline-proof-layout.is-empty .composer-policy-row {
-    justify-content: stretch;
   }
 }

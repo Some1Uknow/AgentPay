@@ -119,7 +119,10 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
         </div>
 
         <div className="conversation premium-conversation">
-          {isEmptyChat ? <StartScreen agents={agents} /> : <>
+          {isEmptyChat ? <div className="empty-chat-center">
+            <StartScreen agents={agents} />
+            <Composer task={task} setTask={setTask} loading={loading} onRun={runAgent} onKeyDown={handleComposerKeyDown} />
+          </div> : <>
             {!messages.length && error ? <Bubble role="assistant"><ErrorBlock error={error} /></Bubble> : null}
             {messages.map(message => (
               <Bubble key={message.id} role={message.role}>
@@ -130,9 +133,9 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
           </>}
         </div>
 
-        <footer className="pro-composer premium-composer">
-          <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} onKeyDown={handleComposerKeyDown} aria-label="Agent instruction" /><button onClick={() => runAgent()} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>
-        </footer>
+        {!isEmptyChat ? <footer className="pro-composer premium-composer">
+          <Composer task={task} setTask={setTask} loading={loading} onRun={runAgent} onKeyDown={handleComposerKeyDown} />
+        </footer> : null}
       </section>
 
       {policyOpen && (
@@ -157,6 +160,21 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
 
 function StartScreen({ agents }: { agents: AnyObj[] }) {
   return <div className="start-screen console-start"><div className="start-orb"><Sparkles size={28} /></div><p className="console-kicker">Safe API spending for agents</p><h2>Ask for a job. The agent buys APIs if it needs them.</h2><p>It can choose from {agents.length || 3} paid APIs, but only if they fit your budget, reputation rule, and allowed task type. Every payment and result is shown back to you.</p></div>;
+}
+function Composer({
+  task,
+  setTask,
+  loading,
+  onRun,
+  onKeyDown
+}: {
+  task: string;
+  setTask: React.Dispatch<React.SetStateAction<string>>;
+  loading: boolean;
+  onRun: () => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+}) {
+  return <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} onKeyDown={onKeyDown} aria-label="Agent instruction" /><button onClick={onRun} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>;
 }
 function Bubble({ role, children }: { role: 'user' | 'assistant'; children: React.ReactNode }) { return <article className="pro-bubble" data-role={role}><span>{role}</span><div>{children}</div></article>; }
 function Thinking() {
