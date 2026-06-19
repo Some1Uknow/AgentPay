@@ -15,7 +15,9 @@ type EnvKey =
   | 'DEPLOYER_PRIVATE_KEY'
   | 'FEEDBACK_PRIVATE_KEY'
   | 'IDENTITY_REGISTRY_ADDRESS'
-  | 'REPUTATION_REGISTRY_ADDRESS';
+  | 'REPUTATION_REGISTRY_ADDRESS'
+  | 'OPENAI_API_KEY'
+  | 'OPENAI_MODEL';
 
 const ENV: Record<EnvKey, string | undefined> = {
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
@@ -29,7 +31,9 @@ const ENV: Record<EnvKey, string | undefined> = {
   DEPLOYER_PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY,
   FEEDBACK_PRIVATE_KEY: process.env.FEEDBACK_PRIVATE_KEY,
   IDENTITY_REGISTRY_ADDRESS: process.env.IDENTITY_REGISTRY_ADDRESS,
-  REPUTATION_REGISTRY_ADDRESS: process.env.REPUTATION_REGISTRY_ADDRESS
+  REPUTATION_REGISTRY_ADDRESS: process.env.REPUTATION_REGISTRY_ADDRESS,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  OPENAI_MODEL: process.env.OPENAI_MODEL
 };
 
 const TOOL_WALLET_ENVS = {
@@ -77,6 +81,8 @@ const FEEDBACK_REQUIRED_ENVS: EnvKey[] = [
   'FEEDBACK_PRIVATE_KEY',
   'REPUTATION_REGISTRY_ADDRESS'
 ];
+
+const AI_AGENT_REQUIRED_ENVS: EnvKey[] = ['OPENAI_API_KEY'];
 
 function isHexAddress(value: string) {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
@@ -211,6 +217,14 @@ export function getFeedbackConfig() {
   };
 }
 
+export function getAiAgentConfig() {
+  validateEnv(AI_AGENT_REQUIRED_ENVS, 'OpenAI agent');
+  return {
+    apiKey: ENV.OPENAI_API_KEY!,
+    model: ENV.OPENAI_MODEL || 'gpt-4.1'
+  };
+}
+
 export function getOnchainReputationConfig() {
   validateEnv(['AVALANCHE_FUJI_RPC', 'REPUTATION_REGISTRY_ADDRESS'], 'onchain reputation');
   return { rpcUrl: ENV.AVALANCHE_FUJI_RPC!, reputationRegistryAddress: ENV.REPUTATION_REGISTRY_ADDRESS as Address };
@@ -221,7 +235,8 @@ export function getDemoReadiness() {
     { name: 'agent catalog', required: AGENTS_REQUIRED_ENVS },
     { name: 'x402 resource server', required: PAYMENT_SERVER_REQUIRED_ENVS },
     { name: 'autonomous agent runner', required: RUN_AGENT_REQUIRED_ENVS },
-    { name: 'onchain feedback writer', required: FEEDBACK_REQUIRED_ENVS }
+    { name: 'onchain feedback writer', required: FEEDBACK_REQUIRED_ENVS },
+    { name: 'OpenAI model agent', required: AI_AGENT_REQUIRED_ENVS }
   ].map(section => ({ name: section.name, ...checkEnv(section.required) }));
 
   return {
@@ -231,6 +246,7 @@ export function getDemoReadiness() {
     requirements: {
       avalancheFuji: checkEnv(['AVALANCHE_FUJI_RPC']).ok,
       x402Payments: checkEnv(['X402_FACILITATOR_URL', 'USDC_ADDRESS', 'BUYER_PRIVATE_KEY']).ok,
+      openAiAgent: checkEnv(['OPENAI_API_KEY']).ok,
       erc8004Identity: checkEnv(['IDENTITY_REGISTRY_ADDRESS']).ok,
       erc8004Reputation: checkEnv(['REPUTATION_REGISTRY_ADDRESS', 'FEEDBACK_PRIVATE_KEY']).ok,
       sellerWallets: checkEnv(['CHEAPYIELDBOT_WALLET', 'AVALANCHEYIELDSCOUT_WALLET', 'RISKORACLEMCP_WALLET']).ok

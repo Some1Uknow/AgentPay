@@ -21,6 +21,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.playwright-mcp/
+
+# local visual review captures
+agentpay-*.png
+research-*.png
+research-*.md
 
 # typescript
 *.tsbuildinfo
