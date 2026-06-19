@@ -83,9 +83,10 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
   const activePolicy = run?.allowancePolicy || policy;
   const spent = Number(run?.totalSpentAtomic || 0);
   const remaining = Number(run?.remainingBudgetAtomic ?? Math.max(Number(activePolicy.maxBudgetAtomic || 0) - spent, 0));
+  const isEmptyChat = messages.length === 0 && !loading && !error;
 
   return (
-    <main className={`pro-chat agent-console inline-proof-layout ${!leftOpen ? 'left-collapsed' : ''}`}>
+    <main className={`pro-chat agent-console inline-proof-layout ${isEmptyChat ? 'is-empty' : ''} ${!leftOpen ? 'left-collapsed' : ''}`}>
       <aside className="pro-sidebar">
         <div className="side-top"><BrandLogo compact={!leftOpen} /><button onClick={() => setLeftOpen(v => !v)} aria-label="Toggle sidebar">{leftOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button></div>
         {leftOpen && <>
@@ -112,7 +113,7 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
         </div>
 
         <div className="conversation premium-conversation">
-          {!messages.length && !loading && !error ? <StartScreen agents={agents} /> : <>
+          {isEmptyChat ? <StartScreen agents={agents} /> : <>
             {!messages.length && error ? <Bubble role="assistant"><ErrorBlock error={error} /></Bubble> : null}
             {messages.map(message => (
               <Bubble key={message.id} role={message.role}>

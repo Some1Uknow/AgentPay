@@ -4677,3 +4677,113 @@ body {
     border-bottom: 0;
   }
 }
+
+/* ---------- Empty agent chat state ---------- */
+.inline-proof-layout.is-empty .pro-chat-main {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.inline-proof-layout.is-empty .premium-conversation {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 24px 24px 220px;
+}
+
+.inline-proof-layout.is-empty .console-start {
+  width: min(760px, 100%);
+  margin: 0;
+  gap: 12px;
+}
+
+.inline-proof-layout.is-empty .console-start h2 {
+  max-width: 760px;
+  font-size: clamp(2rem, 4.2vw, 3.45rem);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.inline-proof-layout.is-empty .console-start p:not(.console-kicker) {
+  max-width: 620px;
+  font-size: 0.92rem;
+}
+
+.inline-proof-layout.is-empty .pro-composer,
+.inline-proof-layout.is-empty .premium-composer {
+  position: absolute;
+  left: 50%;
+  bottom: calc(50% - 185px);
+  z-index: 3;
+  width: min(760px, calc(100% - 48px));
+  transform: translateX(-50%);
+  padding: 0;
+  border-top: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inline-proof-layout.is-empty .composer-policy-row {
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.inline-proof-layout.is-empty .prompt-chips {
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.inline-proof-layout.is-empty .input-row {
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(18, 18, 20, 0.88);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+}
+
+.inline-proof-layout.is-empty .input-row textarea,
+.inline-proof-layout.is-empty .premium-composer .input-row textarea {
+  min-height: 48px;
+  max-height: 130px;
+  padding: 13px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.inline-proof-layout.is-empty .input-row button,
+.inline-proof-layout.is-empty .premium-composer .input-row button {
+  width: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+}
+
+@media (max-width: 720px) {
+  .inline-proof-layout.is-empty .premium-conversation {
+    padding: 18px 14px 230px;
+    place-items: start center;
+  }
+
+  .inline-proof-layout.is-empty .console-start {
+    margin-top: 36px;
+  }
+
+  .inline-proof-layout.is-empty .console-start h2 {
+    max-width: 100%;
+    font-size: clamp(1.85rem, 9vw, 2.8rem);
+  }
+
+  .inline-proof-layout.is-empty .pro-composer,
+  .inline-proof-layout.is-empty .premium-composer {
+    bottom: 22px;
+    width: calc(100% - 24px);
+  }
+
+  .inline-proof-layout.is-empty .prompt-chips,
+  .inline-proof-layout.is-empty .composer-policy-row {
+    justify-content: stretch;
+  }
+}
