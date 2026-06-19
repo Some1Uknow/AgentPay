@@ -42,8 +42,8 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
     if (res.ok) setAgents(Array.isArray(data.agents) ? data.agents : []);
   }
 
-  async function runAgent(next = task) {
-    const trimmed = next.trim();
+  async function runAgent(next?: string) {
+    const trimmed = (typeof next === 'string' ? next : task).trim();
     if (!trimmed || loading) return;
     const userMessage: ChatMessage = { id: `user-${Date.now()}`, role: 'user', content: trimmed };
     setTask(trimmed);
@@ -107,16 +107,15 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
         <header className="pro-chat-header">
           <div><span>{run?.model ? `OpenAI · ${run.model}` : 'AI agent with a spend limit'}</span><h1>Ask a task. The agent can buy APIs only within your rules.</h1></div>
           <div className="header-badges">
+            <div className="budget-card spend-card nav-spend-card" aria-label="Agent allowance">
+              <div><span>Limit</span><strong>{formatUsdc(activePolicy.maxBudgetAtomic)}</strong></div><div><span>Spent</span><strong>{formatUsdc(spent)}</strong></div><div><span>Left</span><strong>{formatUsdc(remaining)}</strong></div>
+              <div className="budget-bar"><i style={{ width: `${Math.min((spent / Number(activePolicy.maxBudgetAtomic || 1)) * 100, 100)}%` }} /></div>
+            </div>
             <ProtocolBadge type="avax" label="Fuji" />
             <ProtocolBadge type="usdc" label="USDC" />
             <button className="icon-toggle" onClick={() => setPolicyOpen(true)} aria-label="Open allowance policy"><Settings size={18} /></button>
           </div>
         </header>
-
-        <div className="budget-card spend-card">
-          <div><span>Limit</span><strong>{formatUsdc(activePolicy.maxBudgetAtomic)}</strong></div><div><span>Spent</span><strong>{formatUsdc(spent)}</strong></div><div><span>Left</span><strong>{formatUsdc(remaining)}</strong></div>
-          <div className="budget-bar"><i style={{ width: `${Math.min((spent / Number(activePolicy.maxBudgetAtomic || 1)) * 100, 100)}%` }} /></div>
-        </div>
 
         <div className="conversation premium-conversation">
           {isEmptyChat ? <div className="empty-chat-center">
@@ -174,7 +173,7 @@ function Composer({
   onRun: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
-  return <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} onKeyDown={onKeyDown} aria-label="Agent instruction" /><button onClick={onRun} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>;
+  return <div className="input-row"><textarea value={task} onChange={e => setTask(e.target.value)} onKeyDown={onKeyDown} aria-label="Agent instruction" /><button onClick={() => onRun()} disabled={loading} aria-label="Run agent">{loading ? <Loader2 className="spin" size={18} /> : <Send size={18} />}</button></div>;
 }
 function Bubble({ role, children }: { role: 'user' | 'assistant'; children: React.ReactNode }) { return <article className="pro-bubble" data-role={role}><span>{role}</span><div>{children}</div></article>; }
 function Thinking() {
