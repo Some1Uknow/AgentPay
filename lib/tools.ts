@@ -55,6 +55,7 @@ export function metadataFor(tool: AgentTool) {
     type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
     name: tool.name,
     description: tool.description,
+    wallet: tool.wallet,
     services: [
       { name: 'MCP', endpoint: `${base}${tool.mcpEndpoint}`, version: '2025-06-18' },
       { name: 'x402-http', endpoint: `${base}${tool.endpoint}`, version: 'v2' }

@@ -21,6 +21,10 @@ export function withRealPayment<T>(tool: AgentTool, handler: (request: NextReque
       price: {
         amount: String(tool.priceAtomic),
         asset: assetAddress()
+      },
+      extra: {
+        name: 'USD Coin',
+        version: '2'
       }
     },
     resource: tool.endpoint,

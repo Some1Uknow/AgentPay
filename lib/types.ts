@@ -29,3 +29,23 @@ export type PaymentReceipt = {
   network: string;
   paymentRef: string;
 };
+
+export type AllowancePolicy = {
+  maxBudgetAtomic: number;
+  minReputation: number;
+  allowedCapabilities: string[];
+  maxTools: number;
+};
+
+export type DecisionTraceEntry = {
+  agentId: number;
+  name: string;
+  action: 'selected' | 'rejected';
+  capabilityMatch: boolean;
+  matchedCapabilities: string[];
+  priceAtomic: number;
+  budgetRemainingBefore: number;
+  reputation: number;
+  policyPass: boolean;
+  reasons: string[];
+};

@@ -8,26 +8,36 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "deploy:contracts": "hardhat run scripts/deploy.ts --network fuji"
+    "compile:contracts": "hardhat compile",
+    "deploy:contracts": "hardhat run scripts/deploy.ts --network fuji",
+    "deploy:contracts:local": "hardhat run scripts/deploy.ts",
+    "demo:wallets": "node scripts/generate-demo-wallets.cjs",
+    "demo:status": "node scripts/demo-status.cjs"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.73",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@x402/core": "^2.15.0",
     "@x402/evm": "^2.15.0",
     "@x402/fetch": "^2.15.0",
     "@x402/next": "^2.15.0",
+    "ai": "^6.0.208",
     "dotenv": "latest",
     "ethers": "^6.13.5",
+    "lucide-react": "^1.21.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "viem": "^2.52.2"
+    "streamdown": "^2.5.0",
+    "viem": "^2.52.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "hardhat": "^2.22.19",
+    "ts-node": "^10.9.2",
     "typescript": "latest"
   }
 }
