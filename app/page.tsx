@@ -1,231 +1,83 @@
-'use client';
-
-import { useEffect, useMemo, useState } from 'react';
-
-type AnyObj = any;
-
-const defaultTask = 'Find the safest Avalanche yield opportunity for 1,000 USDC';
-
-const formatUsdc = (atomic?: number | string) => {
-  const value = Number(atomic || 0) / 1_000_000;
-  return `${value.toFixed(value >= 0.01 ? 2 : 3)} USDC`;
-};
+import Link from 'next/link';
+import { ArrowRight, CheckCircle2, Database, ReceiptText, Search, ShieldCheck, Zap } from 'lucide-react';
+import { BrandLogo, ProtocolBadge } from './components/brand';
 
 export default function Home() {
-  const [agents, setAgents] = useState<AnyObj[]>([]);
-  const [task, setTask] = useState(defaultTask);
-  const [run, setRun] = useState<AnyObj | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function loadAgents() {
-    const res = await fetch('/api/agents');
-    const data = await res.json();
-    setAgents(Array.isArray(data.agents) ? data.agents : []);
-    setError(res.ok ? null : data.error || 'Failed to load agents');
-  }
-
-  async function runAgent() {
-    setLoading(true);
-    setRun(null);
-    setError(null);
-    try {
-      const res = await fetch('/api/run-agent', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ task, maxBudgetAtomic: '100000' })
-      });
-      const data = await res.json();
-      setRun(data);
-      setError(res.ok ? null : data.error || 'Agent run failed');
-      await loadAgents();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => { loadAgents(); }, []);
-
-  const selectedIds = useMemo(() => new Set((run?.selectedTools || []).map((tool: AnyObj) => tool.agentId)), [run]);
-  const totalTools = agents.length;
-  const x402Tools = agents.filter(agent => agent.metadata?.x402Support || agent.x402Support !== false).length;
-
   return (
-    <main className="app-shell">
-      <div className="page-noise" aria-hidden="true" />
-      <div className="page-columns" aria-hidden="true" />
-
-      <header className="site-header">
-        <a href="#top" className="brand-mark" aria-label="AgentPay MCP home">
-          <span className="brand-glyph">AP</span>
-          <span>AgentPay MCP</span>
-        </a>
-        <nav className="topnav" aria-label="Primary">
-          <a href="#registry">Registry</a>
-          <a href="#run">Run agent</a>
-          <a href="#receipts">Receipts</a>
-        </nav>
-        <button className="nav-cta" onClick={runAgent} disabled={loading}>{loading ? 'Running…' : 'Run flow'}</button>
+    <main className="premium-page">
+      <header className="premium-nav">
+        <BrandLogo />
+        <nav><Link href="/agent">Demo</Link><Link href="/registry">Registry</Link><Link href="/developer">Developers</Link></nav>
+        <Link className="primary-button" href="/agent">Launch demo <ArrowRight size={16} /></Link>
       </header>
 
-      <section className="hero-section" id="top">
-        <div className="hero-copy">
-          <p className="eyebrow">Avalanche Fuji · x402 · ERC-8004 trust</p>
-          <h1>Paid MCP tools need a trust layer.</h1>
-          <p className="hero-lede">
-            AgentPay lets AI agents discover MCP tools, compare price and reputation, pay with x402, and update payment-backed trust on Avalanche.
-          </p>
-          <div className="hero-actions">
-            <button className="hero-cta" onClick={runAgent} disabled={loading}>{loading ? 'Executing testnet flow…' : 'Run agentic payment demo'}</button>
-            <a className="hero-link" href="#registry">View registered tools</a>
-          </div>
+      <section className="premium-hero">
+        <div className="hero-text">
+          <div className="badge-row"><ProtocolBadge type="avax" label="Avalanche Fuji" /><ProtocolBadge type="x402" label="x402 payments" /><ProtocolBadge type="erc8004" label="agent reputation" /></div>
+          <h1>Safe API spending for AI agents.</h1>
+          <p>AgentPay lets an AI agent buy paid APIs without getting a blank check. You set the budget and rules, the agent chooses tools, x402 pays, and Avalanche records proof.</p>
+          <div className="hero-ctas"><Link className="primary-button big" href="/agent">Open agent console</Link><Link className="secondary-button" href="/registry">View paid APIs</Link></div>
         </div>
-
-        <div className="control-plane" aria-label="AgentPay flow preview">
-          <div className="terminal-topbar">
-            <div className="terminal-dots"><span /><span /><span /></div>
-            <span>agentpay/control-plane</span>
-          </div>
-          <div className="flow-panel">
-            <FlowStep number="01" title="Discover" body={`${totalTools || 3} MCP tools listed in ERC-8004 registry`} />
-            <FlowStep number="02" title="Rank" body="Capability match + reputation + price" active />
-            <FlowStep number="03" title="Pay" body="HTTP 402 → x402 USDC on Avalanche Fuji" />
-            <FlowStep number="04" title="Trust" body="Successful paid calls update reputation" />
-          </div>
-          <div className="mini-metrics">
-            <Metric value={String(totalTools || 3)} label="registered tools" />
-            <Metric value={String(x402Tools || 3)} label="x402 enabled" />
-            <Metric value="0.08" label="USDC target spend" />
+        <div className="hero-visual">
+          <div className="payment-card floating-card">
+            <div className="card-top"><span>Agent allowance</span><strong>0.10 USDC max</strong></div>
+            <FlowRow icon={<Search />} title="Find APIs" body="yield and risk tools" />
+            <FlowRow icon={<ShieldCheck />} title="Check rules" body="budget, reputation, capability" />
+            <FlowRow icon={<Zap />} title="Pay safely" body="x402 payment on Fuji" />
+            <FlowRow icon={<ReceiptText />} title="Show proof" body="receipts and reputation writes" />
           </div>
         </div>
       </section>
 
-      <section className="statement-band">
-        Agents should not guess which tool to trust. They should pay, verify, and remember.
+      <section className="proof-strip">
+        <Stat value="0.10" label="USDC allowance" />
+        <Stat value="x402" label="API payments" />
+        <Stat value="Fuji" label="testnet proof" />
+        <Stat value="5/5" label="tool reputation" />
       </section>
 
-      <section className="content-section" id="run">
-        <div className="section-heading">
-          <p className="section-kicker">Agent run</p>
-          <h2>One task. Multiple paid tools. One rational choice.</h2>
-        </div>
-        <div className="run-console">
-          <label htmlFor="task">Task for the buyer agent</label>
-          <textarea id="task" value={task} onChange={e => setTask(e.target.value)} />
-          <div className="console-footer">
-            <span>Budget cap: 0.10 USDC · Network: eip155:43113</span>
-            <button onClick={runAgent} disabled={loading}>{loading ? 'Waiting for x402…' : 'Execute flow'}</button>
-          </div>
-        </div>
-      </section>
-
-      <section className="content-section alt-surface" id="registry">
-        <div className="section-heading split-heading">
-          <div>
-            <p className="section-kicker">Registry</p>
-            <h2>Paid MCP supply, made legible.</h2>
-          </div>
-          <p>Each server exposes metadata, pricing, capabilities, and reputation signals agents can reason over.</p>
-        </div>
-        {error && <div className="error-card"><strong>API error</strong><p>{error}</p></div>}
-        <div className="tool-registry">
-          {agents.map((agent) => <ToolCard key={agent.agentId} agent={agent} selected={selectedIds.has(agent.agentId)} />)}
+      <section className="premium-section">
+        <div className="section-copy"><span>How it works</span><h2>The agent gets a budget, not your wallet.</h2><p>You give the agent a task and a spend limit. It can only buy APIs that match your rules.</p></div>
+        <div className="step-grid">
+          <Step n="01" icon={<Database />} title="APIs list prices" body="Each paid API publishes what it does, what it costs, and where payment goes." />
+          <Step n="02" icon={<Search />} title="The agent picks" body="OpenAI decides which API is useful for the task instead of calling everything." />
+          <Step n="03" icon={<Zap />} title="x402 pays" body="If the API passes policy, the agent sends a real testnet payment." />
+          <Step n="04" icon={<CheckCircle2 />} title="Proof is saved" body="The app shows receipts and writes reputation for successful API work." />
         </div>
       </section>
 
-      <section className="content-section proof-section" id="receipts">
-        <div className="section-heading">
-          <p className="section-kicker">Execution proof</p>
-          <h2>{run ? 'The agent made the market choice.' : 'Run the flow to see payment proof.'}</h2>
+      <section className="premium-section">
+        <div className="section-copy"><span>The problem</span><h2>Agents need tools, but payments are unsafe without rules.</h2><p>An AI agent may need live data, risk checks, or paid APIs. AgentPay makes sure it cannot overspend or buy from low-trust providers.</p></div>
+        <div className="step-grid">
+          <Step n="01" icon={<ShieldCheck />} title="Budget cap" body="Set the most the agent can spend before it starts working." />
+          <Step n="02" icon={<Database />} title="Allowed work" body="Limit what kinds of APIs the agent is allowed to buy." />
+          <Step n="03" icon={<Search />} title="Trust filter" body="Block providers that do not meet your reputation bar." />
+          <Step n="04" icon={<ReceiptText />} title="Clear audit trail" body="See what it bought, why it bought it, and what happened onchain." />
         </div>
+      </section>
 
-        {!run && (
-          <div className="empty-state">
-            <span className="empty-code">402</span>
-            <p>No run yet. Execute the demo to show discovered tools, selected tools, payment receipts, and trust updates.</p>
-          </div>
-        )}
+      <section className="premium-section">
+        <div className="section-copy"><span>For builders</span><h2>Turn an API into something agents can pay for.</h2><p>API providers get a simple paid endpoint. Agent operators get policy, receipts, and reputation in one place.</p></div>
+        <div className="step-grid">
+          <Step n="API" icon={<Zap />} title="Paid API access" body="HTTP 402 asks for payment before the endpoint responds." />
+          <Step n="ID" icon={<Database />} title="Tool identity" body="The API advertises its wallet, price, endpoint, and capabilities." />
+          <Step n="REP" icon={<CheckCircle2 />} title="Reputation" body="Good paid work improves the provider's score." />
+          <Step n="UX" icon={<ShieldCheck />} title="Operator console" body="The user sees the agent's answer and the payment proof together." />
+        </div>
+      </section>
 
-        {run?.error && <div className="error-card"><strong>Flow blocked</strong><p>{run.error}</p></div>}
-
-        {run && !run.error && (
-          <div className="execution-grid">
-            <div className="decision-panel">
-              <p className="panel-label">Tool ranking</p>
-              {(run.discoveredTools || []).map((tool: AnyObj) => (
-                <div className={`ranking-row ${selectedIds.has(tool.agentId) ? 'is-selected' : ''}`} key={tool.agentId}>
-                  <div>
-                    <strong>{tool.name}</strong>
-                    <span>{selectedIds.has(tool.agentId) ? 'Selected' : 'Rejected'} · score {tool.scoring?.score ?? '—'}</span>
-                  </div>
-                  <div className="rank-price">{formatUsdc(tool.priceAtomic)}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="decision-panel">
-              <p className="panel-label">Payment receipts</p>
-              {(run.payments || []).length ? (run.payments || []).map((payment: AnyObj, index: number) => (
-                <div className="receipt-row" key={payment?.txHash || payment?.transaction || payment?.paymentRef || index}>
-                  <span>{payment?.tool || `Payment ${index + 1}`}</span>
-                  <strong>{payment?.network || run.network || 'Avalanche Fuji'}</strong>
-                  <code>{payment?.txHash || payment?.transaction || payment?.id || payment?.paymentRef || 'PAYMENT-RESPONSE received'}</code>
-                </div>
-              )) : <p className="muted">Payment response will appear here after successful x402 settlement.</p>}
-              <div className="total-spend">Total spent <strong>{run.totalSpentDisplay}</strong></div>
-            </div>
-
-            <div className="decision-panel">
-              <p className="panel-label">Reputation writeback</p>
-              {(run.reputationUpdates || []).length ? (run.reputationUpdates || []).map((update: AnyObj) => (
-                <div className="receipt-row" key={update.feedbackTxHash || update.paymentRef}>
-                  <span>{update.name}</span>
-                  <strong>{update.validation?.ok ? 'validated' : 'blocked'}</strong>
-                  <code>{update.feedbackTxHash || update.successfulCallTxHash || update.paymentRef}</code>
-                </div>
-              )) : <p className="muted">Successful paid calls will be recorded on the reputation registry.</p>}
-            </div>
-
-            <div className="result-panel">
-              <p className="panel-label">Final recommendation</p>
-              <pre>{typeof run.result === 'string' ? run.result : JSON.stringify(run.result, null, 2)}</pre>
-            </div>
-          </div>
-        )}
+      <section className="premium-section final-cta-section">
+        <div className="final-cta-card">
+          <div><span>Fuji demo</span><h2>Try an agent that buys APIs with a spending limit.</h2><p>Ask for an Avalanche yield task. The agent chooses paid APIs, spends testnet USDC through x402, and shows the proof.</p></div>
+          <Link className="primary-button big" href="/agent">Open agent console <ArrowRight size={16} /></Link>
+        </div>
       </section>
     </main>
   );
 }
 
-function ToolCard({ agent, selected }: { agent: AnyObj; selected: boolean }) {
-  const rep = agent.reputationSummary || {};
-  const reputation = Number(rep.score ?? agent.reputation ?? 0);
-  const displayRep = reputation > 0 ? `${reputation.toFixed(1)}/5` : 'new';
-
-  return (
-    <article className={`tool-card ${selected ? 'selected-card' : ''}`}>
-      <div className="tool-topline">
-        <span className="tool-id">#{agent.agentId}</span>
-        <span className="price-pill">{agent.pricing?.display || formatUsdc(agent.priceAtomic)}</span>
-      </div>
-      <h3>{agent.name}</h3>
-      <p>{agent.description}</p>
-      <div className="trust-strip">
-        <div><span>Reputation</span><strong>{displayRep}</strong></div>
-        <div><span>Calls</span><strong>{rep.successfulCalls ?? agent.successfulCalls ?? 0}</strong></div>
-      </div>
-      <div className="capability-list">
-        {(agent.capabilities || []).map((cap: string) => <span key={cap}>{cap}</span>)}
-      </div>
-      <code>{agent.endpoint}</code>
-    </article>
-  );
+function FlowRow({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return <div className="flow-row"><span>{icon}</span><div><strong>{title}</strong><small>{body}</small></div></div>;
 }
-
-function FlowStep({ number, title, body, active }: { number: string; title: string; body: string; active?: boolean }) {
-  return <div className={`flow-step ${active ? 'active' : ''}`}><span>{number}</span><div><strong>{title}</strong><p>{body}</p></div></div>;
-}
-
-function Metric({ value, label }: { value: string; label: string }) {
-  return <div><strong>{value}</strong><span>{label}</span></div>;
-}
+function Stat({ value, label }: { value: string; label: string }) { return <div><strong>{value}</strong><span>{label}</span></div>; }
+function Step({ n, icon, title, body }: { n: string; icon: React.ReactNode; title: string; body: string }) { return <article className="premium-step"><div><span>{n}</span>{icon}</div><h3>{title}</h3><p>{body}</p></article>; }

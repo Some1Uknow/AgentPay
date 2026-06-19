@@ -1,3 +1,4 @@
+import 'streamdown/styles.css';
 import './styles.css';
 import type { Metadata } from 'next';
 
