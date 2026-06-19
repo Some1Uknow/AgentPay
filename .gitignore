@@ -39,3 +39,4 @@ research-*.md
 .idea/
 
 docs/
+.vercel
