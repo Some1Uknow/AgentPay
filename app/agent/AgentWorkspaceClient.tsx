@@ -95,12 +95,12 @@ export default function AgentWorkspaceClient({ initialAgents, initialError = nul
     <main className={`pro-chat agent-console inline-proof-layout ${isEmptyChat ? 'is-empty' : ''} ${!leftOpen ? 'left-collapsed' : ''}`}>
       <aside className="pro-sidebar">
         <div className="side-top"><BrandLogo compact={!leftOpen} /><button onClick={() => setLeftOpen(v => !v)} aria-label="Toggle sidebar">{leftOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}</button></div>
-        {leftOpen && <>
+        <div className="side-content" aria-hidden={!leftOpen}>
           <button className="new-thread" onClick={() => { setMessages([]); setRun(null); setError(initialError); setTask(defaultTask); }}>New session</button>
           <div className="run-history"><p>Spend limit</p><div className="history-item active"><span /><div><strong>{formatUsdc(policy.maxBudgetAtomic)}</strong><small>max the agent can spend</small></div></div></div>
           <div className="run-history"><p>Paid APIs</p><div className="mini-market-count"><strong>{agents.length}</strong><span>available tools</span></div></div>
           <nav className="side-links"><Link href="/registry">Tool registry</Link><Link href="/developer">Developer setup</Link><Link href="/">Landing</Link></nav>
-        </>}
+        </div>
       </aside>
 
       <section className="pro-chat-main">
