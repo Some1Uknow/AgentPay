@@ -68,9 +68,9 @@ async function writeValidationProof(tool: Awaited<ReturnType<typeof scoreTools>>
   const requestBody = { agentId: tool.agentId, tool: tool.name, endpoint: tool.endpoint, paymentResponse, response, validation };
   const requestHash = ethers.keccak256(ethers.toUtf8Bytes(stableJson(requestBody)));
   const responseHash = ethers.keccak256(ethers.toUtf8Bytes(stableJson({ requestHash, ok: validation.ok, reason: validation.reason })));
-  const requestTx = await validationFromRequester.validationRequest(await validator.getAddress(), BigInt(tool.agentId), '', requestHash);
+  const requestTx = await validationFromRequester['validationRequest(address,uint256,string,bytes32)'](await validator.getAddress(), BigInt(tool.agentId), '', requestHash);
   const requestReceipt = await requestTx.wait();
-  const responseTx = await validationFromValidator.validationResponse(requestHash, validation.ok ? 100 : 0, '', responseHash, 'x402-paid-api-response');
+  const responseTx = await validationFromValidator['validationResponse(bytes32,uint8,string,bytes32,string)'](requestHash, validation.ok ? 100 : 0, '', responseHash, 'x402-paid-api-response');
   const responseReceipt = await responseTx.wait();
 
   return {
