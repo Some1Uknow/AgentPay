@@ -283,7 +283,32 @@ export async function callPaidTool(origin: string, tool: Awaited<ReturnType<type
 async function writeReputationUpdate(tool: Awaited<ReturnType<typeof scoreTools>>[number], response: unknown, paymentResponse: unknown) {
   const validation = validateDeliveredWork(tool.name, response);
   if (!validation.ok) throw new Error(`Delivered work validation failed for ${tool.name}: ${validation.reason}`);
-  const validationUpdate = await writeValidationProof(tool, response, paymentResponse, validation);
+  let validationUpdate: Awaited<ReturnType<typeof writeValidationProof>> | {
+    agentId: number;
+    name: string;
+    requestHash: null;
+    responseHash: null;
+    score: number;
+    tag: string;
+    requestTxHash: null;
+    responseTxHash: null;
+    error: string;
+  };
+  try {
+    validationUpdate = await writeValidationProof(tool, response, paymentResponse, validation);
+  } catch (error) {
+    validationUpdate = {
+      agentId: tool.agentId,
+      name: tool.name,
+      requestHash: null,
+      responseHash: null,
+      score: validation.ok ? 100 : 0,
+      tag: 'x402-paid-api-response',
+      requestTxHash: null,
+      responseTxHash: null,
+      error: error instanceof Error ? error.message : 'Validation registry write failed'
+    };
+  }
 
   const config = getFeedbackConfig();
   const provider = new ethers.JsonRpcProvider(config.rpcUrl);
