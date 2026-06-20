@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ExternalLink, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { AgentAvatar, AvalancheLogo, BrandLogo, ProtocolBadge, UsdcLogo, snowtraceAddress } from '../components/brand';
+import { AgentAvatar, AppFooter, AvalancheLogo, BrandLogo, ProtocolBadge, UsdcLogo, snowtraceAddress } from '../components/brand';
 
 type AnyObj = any;
 
@@ -29,6 +29,7 @@ export default function RegistryClient({ initialAgents, initialError = null }: {
       <section className="registry-toolbar"><div><Search size={18} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tools, capabilities, endpoints..." /></div><span>{filtered.length} tools</span></section>
       {error && <div className="polished-error">{error}</div>}
       <section className="premium-tool-grid">{filtered.map(agent => <RegistryCard key={agent.agentId} agent={agent} />)}</section>
+      <AppFooter />
     </main>
   );
 }

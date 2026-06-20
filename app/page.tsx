@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Database, ReceiptText, Search, ShieldCheck, Zap } from 'lucide-react';
-import { BrandLogo, ProtocolBadge } from './components/brand';
+import { AppFooter, BrandLogo, ProtocolBadge } from './components/brand';
+import { AnimatedHeroConversation } from './components/HeroAnimation';
 
 export default function Home() {
   return (
@@ -18,15 +19,7 @@ export default function Home() {
           <p>AgentPay lets an AI agent buy paid APIs without getting a blank check. You set the budget and rules, the agent chooses tools, x402 pays, and Avalanche records proof.</p>
           <div className="hero-ctas"><Link className="primary-button big" href="/agent">Open agent console</Link><Link className="secondary-button" href="/registry">View paid APIs</Link></div>
         </div>
-        <div className="hero-visual">
-          <div className="payment-card floating-card">
-            <div className="card-top"><span>Agent allowance</span><strong>0.10 USDC max</strong></div>
-            <FlowRow icon={<Search />} title="Find APIs" body="yield and risk tools" />
-            <FlowRow icon={<ShieldCheck />} title="Check rules" body="budget, reputation, capability" />
-            <FlowRow icon={<Zap />} title="Pay safely" body="x402 payment on Fuji" />
-            <FlowRow icon={<ReceiptText />} title="Show proof" body="receipts and reputation writes" />
-          </div>
-        </div>
+        <AnimatedHeroConversation />
       </section>
 
       <section className="proof-strip">
@@ -72,6 +65,8 @@ export default function Home() {
           <Link className="primary-button big" href="/agent">Open agent console <ArrowRight size={16} /></Link>
         </div>
       </section>
+
+      <AppFooter />
     </main>
   );
 }

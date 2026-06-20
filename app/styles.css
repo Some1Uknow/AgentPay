@@ -5326,3 +5326,73 @@ body {
     border-radius: 0;
   }
 }
+
+/* ---------- Hero animation chat visual polish ---------- */
+.hero-animation-chat.floating-card {
+  display: flex;
+  animation: premiumFloat 7s ease-in-out infinite;
+}
+
+.hero-animation-chat {
+  gap: 24px;
+}
+
+.hero-animation-chat .pro-bubble > div {
+  backdrop-filter: blur(8px);
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+
+.hero-animation-chat .pro-bubble[data-role="assistant"] {
+  align-self: flex-start;
+}
+
+.hero-animation-chat .answer-block {
+  gap: 14px;
+}
+
+.hero-animation-chat .answer-block > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--brand-line);
+  grid-template-columns: none;
+  align-items: stretch;
+}
+
+.hero-animation-chat .answer-block .decision-proof {
+  border-color: var(--brand-line);
+  background: rgba(255,255,255,.04);
+  backdrop-filter: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.hero-animation-chat .decision-proof > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-animation-chat .decision-proof > span {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.hero-animation-chat .decision-proof > span:last-child {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-animation-chat .answer-block p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  padding: 0 2px;
+}

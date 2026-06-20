@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Code2, Database, ReceiptText, ShieldCheck, Zap } from 'lucide-react';
-import { BrandLogo, ProtocolBadge } from '../components/brand';
+import { AppFooter, BrandLogo, ProtocolBadge } from '../components/brand';
 
 const snippet = `export const POST = withX402(handler, {
   accepts: {
@@ -25,6 +25,7 @@ export default function DeveloperPage() {
         <div className="code-card"><div><span><Code2 size={16} /> app/api/tools/route.ts</span><button>Copy</button></div><pre>{snippet}</pre></div>
         <div className="dev-steps"><Step icon={<Zap />} title="Wrap endpoint" body="The tool returns HTTP 402 until the buyer agent supplies a valid x402 payment." /><Step icon={<ReceiptText />} title="Set price" body="Charge exact USDC atomic units on Avalanche Fuji per tool call." /><Step icon={<Database />} title="Register metadata" body="Expose endpoint, wallet, price, capabilities, and identity URI." /><Step icon={<ShieldCheck />} title="Earn reputation" body="After useful work, the buyer agent writes feedback to the registry." /></div>
       </section>
+      <AppFooter />
     </main>
   );
 }
