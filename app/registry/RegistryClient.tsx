@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ExternalLink, Search } from 'lucide-react';
+import { ExternalLink, Search, ShieldCheck } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { AgentAvatar, AppFooter, AvalancheLogo, BrandLogo, ProtocolBadge, UsdcLogo, snowtraceAddress } from '../components/brand';
 
@@ -25,10 +25,25 @@ export default function RegistryClient({ initialAgents, initialError = null }: {
   return (
     <main className="premium-page registry-premium">
       <header className="premium-nav"><BrandLogo /><nav><Link href="/agent">Demo</Link><Link href="/registry">Registry</Link><Link href="/developer">Developers</Link></nav><Link className="primary-button" href="/agent">Run agent</Link></header>
-      <section className="page-hero compact registry-hero"><div><span>Tool registry</span><h1>Paid tools your agent can hire.</h1><p>Browse live x402 providers with wallets, prices, capabilities, and reputation records on Avalanche Fuji.</p></div><div className="badge-row"><ProtocolBadge type="avax" label="Fuji" /><ProtocolBadge type="usdc" label="USDC" /><ProtocolBadge type="erc8004" label="Reputation" /></div></section>
-      <section className="registry-toolbar"><div><Search size={18} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tools, capabilities, endpoints..." /></div><span>{filtered.length} tools</span></section>
+      <section className="page-hero compact registry-hero">
+        <div>
+          <span>Tool registry</span>
+          <h1>Paid tools your agent can hire.</h1>
+          <p>Live x402 providers with spend limits, wallets, prices, capabilities, and reputation records on Avalanche Fuji.</p>
+        </div>
+        <div className="registry-status-stack">
+          <div className="registry-status-card"><ShieldCheck size={17} /><strong>{agents.length}</strong><span>registered providers</span></div>
+          <div className="badge-row"><ProtocolBadge type="avax" label="Fuji" /><ProtocolBadge type="usdc" label="USDC" /><ProtocolBadge type="erc8004" label="Reputation" /></div>
+        </div>
+      </section>
+      <section className="registry-toolbar">
+        <div><Search size={18} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search tools, capabilities, endpoints..." /></div>
+        <span>{filtered.length} shown</span>
+      </section>
       {error && <div className="polished-error">{error}</div>}
-      <section className="premium-tool-grid">{filtered.map(agent => <RegistryCard key={agent.agentId} agent={agent} />)}</section>
+      <section className="premium-tool-grid registry-grid">
+        {filtered.length ? filtered.map(agent => <RegistryCard key={agent.agentId} agent={agent} />) : <div className="registry-empty">No provider matches that search.</div>}
+      </section>
       <AppFooter />
     </main>
   );

@@ -12,7 +12,7 @@ AgentPay lets AI agents safely buy paid APIs with spending limits. OpenAI choose
 - **Working prototype:** Next.js app deployed on Vercel.
 - **Network:** Avalanche Fuji Testnet, the Avalanche C-Chain testnet.
 - **Agent demo:** An OpenAI-powered agent chooses paid APIs, pays through x402, receives API results, and writes reputation proof on Fuji.
-- **Contracts:** Agent identity and reputation registries deployed to Fuji.
+- **Contracts:** Agent identity, reputation, and validation registries deployed to Fuji.
 - **No real funds:** Uses Fuji test AVAX and testnet USDC-compatible payment configuration.
 - **Submission delta:** This Speedrun adds the model-driven spend agent, allowance policy, x402 paid tool calls, onchain reputation writes, proof UI, and production deployment.
 
@@ -169,7 +169,7 @@ When the agent calls a paid API:
 
 The important part: the OpenAI model can request payment, but x402 payment only happens after deterministic policy checks pass.
 
-## How AgentPay Uses ERC-8004-Style Identity And Trust
+## How AgentPay Uses ERC-8004 Identity, Reputation, And Validation
 
 AgentPay models paid APIs as registered agent/tool providers.
 
@@ -177,8 +177,9 @@ The deployed registries are:
 
 - `AgentIdentityRegistry`
 - `AgentReputationRegistry`
+- `AgentValidationRegistry`
 
-The identity registry stores provider metadata:
+The identity registry is ERC-721 compatible and stores provider identity:
 
 - agent ID
 - API URI
@@ -196,8 +197,17 @@ The reputation registry stores trust data:
 - feedback tags
 - feedback hashes
 
+The validation registry stores proof that delivered API work was checked:
+
+- validation request hash
+- validator address
+- validation score
+- validation response hash
+
 After a paid API returns valid work, AgentPay writes:
 
+- `validationRequest(validator, agentId, requestURI, requestHash)`
+- `validationResponse(requestHash, 100, responseURI, responseHash, "x402-paid-api-response")`
 - `recordSuccessfulCall(agentId, paymentRef)`
 - `giveFeedback(agentId, 5, ..., "paid-call", "x402-autonomous-agent", ...)`
 
@@ -289,6 +299,7 @@ DEPLOYER_PRIVATE_KEY=0x...
 FEEDBACK_PRIVATE_KEY=0x...
 IDENTITY_REGISTRY_ADDRESS=0x...
 REPUTATION_REGISTRY_ADDRESS=0x...
+VALIDATION_REGISTRY_ADDRESS=0x...
 ```
 
 ## Deploy Contracts
@@ -300,7 +311,7 @@ pnpm deploy:contracts
 
 The deploy script:
 
-- deploys identity and reputation registries
+- deploys identity, reputation, and validation registries
 - registers the three paid API providers
 - writes initial reputation so the demo can reject a low-trust provider
 
@@ -380,7 +391,7 @@ The paid flow needs:
 - x402 facilitator supporting `eip155:43113`
 - funded buyer wallet
 - valid testnet USDC/payment asset
-- deployed identity and reputation registries
+- deployed identity, reputation, and validation registries
 - funded feedback wallet for reputation writes
 
 If any of these are missing, the app returns a configuration or payment error instead of fabricating a transaction.

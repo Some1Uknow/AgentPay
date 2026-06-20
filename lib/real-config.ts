@@ -16,6 +16,7 @@ type EnvKey =
   | 'FEEDBACK_PRIVATE_KEY'
   | 'IDENTITY_REGISTRY_ADDRESS'
   | 'REPUTATION_REGISTRY_ADDRESS'
+  | 'VALIDATION_REGISTRY_ADDRESS'
   | 'OPENAI_API_KEY'
   | 'OPENAI_MODEL';
 
@@ -32,6 +33,7 @@ const ENV: Record<EnvKey, string | undefined> = {
   FEEDBACK_PRIVATE_KEY: process.env.FEEDBACK_PRIVATE_KEY,
   IDENTITY_REGISTRY_ADDRESS: process.env.IDENTITY_REGISTRY_ADDRESS,
   REPUTATION_REGISTRY_ADDRESS: process.env.REPUTATION_REGISTRY_ADDRESS,
+  VALIDATION_REGISTRY_ADDRESS: process.env.VALIDATION_REGISTRY_ADDRESS,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_MODEL: process.env.OPENAI_MODEL
 };
@@ -48,7 +50,8 @@ const ADDRESS_KEYS: EnvKey[] = [
   'AVALANCHEYIELDSCOUT_WALLET',
   'RISKORACLEMCP_WALLET',
   'IDENTITY_REGISTRY_ADDRESS',
-  'REPUTATION_REGISTRY_ADDRESS'
+  'REPUTATION_REGISTRY_ADDRESS',
+  'VALIDATION_REGISTRY_ADDRESS'
 ];
 
 const PRIVATE_KEY_KEYS: EnvKey[] = [
@@ -64,7 +67,8 @@ const AGENTS_REQUIRED_ENVS: EnvKey[] = [
   'AVALANCHEYIELDSCOUT_WALLET',
   'RISKORACLEMCP_WALLET',
   'IDENTITY_REGISTRY_ADDRESS',
-  'REPUTATION_REGISTRY_ADDRESS'
+  'REPUTATION_REGISTRY_ADDRESS',
+  'VALIDATION_REGISTRY_ADDRESS'
 ];
 
 const PAYMENT_SERVER_REQUIRED_ENVS: EnvKey[] = ['X402_FACILITATOR_URL'];
@@ -79,7 +83,15 @@ const RUN_AGENT_REQUIRED_ENVS: EnvKey[] = [
 const FEEDBACK_REQUIRED_ENVS: EnvKey[] = [
   'AVALANCHE_FUJI_RPC',
   'FEEDBACK_PRIVATE_KEY',
+  'DEPLOYER_PRIVATE_KEY',
   'REPUTATION_REGISTRY_ADDRESS'
+];
+
+const VALIDATION_REQUIRED_ENVS: EnvKey[] = [
+  'AVALANCHE_FUJI_RPC',
+  'DEPLOYER_PRIVATE_KEY',
+  'FEEDBACK_PRIVATE_KEY',
+  'VALIDATION_REGISTRY_ADDRESS'
 ];
 
 const AI_AGENT_REQUIRED_ENVS: EnvKey[] = ['OPENAI_API_KEY'];
@@ -185,6 +197,7 @@ export function getAgentsConfig() {
     usdcAddress: ENV.USDC_ADDRESS as Address,
     identityRegistryAddress: ENV.IDENTITY_REGISTRY_ADDRESS as Address,
     reputationRegistryAddress: ENV.REPUTATION_REGISTRY_ADDRESS as Address,
+    validationRegistryAddress: ENV.VALIDATION_REGISTRY_ADDRESS as Address,
     sellerWallets: {
       CheapYieldBot: ENV.CHEAPYIELDBOT_WALLET as Address,
       AvalancheYieldScout: ENV.AVALANCHEYIELDSCOUT_WALLET as Address,
@@ -213,7 +226,18 @@ export function getFeedbackConfig() {
   return {
     rpcUrl: ENV.AVALANCHE_FUJI_RPC!,
     feedbackPrivateKey: ENV.FEEDBACK_PRIVATE_KEY!,
+    deployerPrivateKey: ENV.DEPLOYER_PRIVATE_KEY!,
     reputationRegistryAddress: ENV.REPUTATION_REGISTRY_ADDRESS as Address
+  };
+}
+
+export function getValidationConfig() {
+  validateEnv(VALIDATION_REQUIRED_ENVS, 'validation registry');
+  return {
+    rpcUrl: ENV.AVALANCHE_FUJI_RPC!,
+    deployerPrivateKey: ENV.DEPLOYER_PRIVATE_KEY!,
+    feedbackPrivateKey: ENV.FEEDBACK_PRIVATE_KEY!,
+    validationRegistryAddress: ENV.VALIDATION_REGISTRY_ADDRESS as Address
   };
 }
 
@@ -236,6 +260,7 @@ export function getDemoReadiness() {
     { name: 'x402 resource server', required: PAYMENT_SERVER_REQUIRED_ENVS },
     { name: 'autonomous agent runner', required: RUN_AGENT_REQUIRED_ENVS },
     { name: 'onchain feedback writer', required: FEEDBACK_REQUIRED_ENVS },
+    { name: 'validation registry', required: VALIDATION_REQUIRED_ENVS },
     { name: 'OpenAI model agent', required: AI_AGENT_REQUIRED_ENVS }
   ].map(section => ({ name: section.name, ...checkEnv(section.required) }));
 
@@ -249,6 +274,7 @@ export function getDemoReadiness() {
       openAiAgent: checkEnv(['OPENAI_API_KEY']).ok,
       erc8004Identity: checkEnv(['IDENTITY_REGISTRY_ADDRESS']).ok,
       erc8004Reputation: checkEnv(['REPUTATION_REGISTRY_ADDRESS', 'FEEDBACK_PRIVATE_KEY']).ok,
+      erc8004Validation: checkEnv(['VALIDATION_REGISTRY_ADDRESS', 'DEPLOYER_PRIVATE_KEY', 'FEEDBACK_PRIVATE_KEY']).ok,
       sellerWallets: checkEnv(['CHEAPYIELDBOT_WALLET', 'AVALANCHEYIELDSCOUT_WALLET', 'RISKORACLEMCP_WALLET']).ok
     }
   };

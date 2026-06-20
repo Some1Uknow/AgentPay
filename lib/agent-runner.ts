@@ -4,7 +4,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { generateText, stepCountIs, tool } from 'ai';
 import { ethers } from 'ethers';
 import { z } from 'zod';
-import { buyerAccount, getAiAgentConfig, getFeedbackConfig, NETWORK } from './real-config';
+import { buyerAccount, getAiAgentConfig, getFeedbackConfig, getValidationConfig, NETWORK } from './real-config';
 import { toApiTool, tools } from './tools';
 import { attachOnchainReputation } from './onchain-reputation';
 import { AllowancePolicy, DecisionTraceEntry } from './types';
@@ -12,6 +12,11 @@ import { AllowancePolicy, DecisionTraceEntry } from './types';
 const reputationAbi = [
   'function giveFeedback(uint256 agentId,int128 value,uint8 valueDecimals,string tag1,string tag2,string endpoint,string feedbackURI,bytes32 feedbackHash) external',
   'function recordSuccessfulCall(uint256 agentId,bytes32 paymentRef) external'
+];
+
+const validationAbi = [
+  'function validationRequest(address validatorAddress,uint256 agentId,string requestURI,bytes32 requestHash) external',
+  'function validationResponse(bytes32 requestHash,uint8 response,string responseURI,bytes32 responseHash,string tag) external'
 ];
 
 export const DEFAULT_ALLOWANCE_POLICY: AllowancePolicy = {
@@ -51,6 +56,32 @@ function validateDeliveredWork(toolName: string, response: any) {
   if (!response || response.tool !== toolName) return { ok: false, reason: 'tool response identity mismatch' };
   if (toolName === 'RiskOracleMCP') return { ok: Array.isArray(response.protocols) && response.protocols.length > 0, reason: 'risk protocols returned' };
   return { ok: Array.isArray(response.opportunities) && response.opportunities.length > 0, reason: 'yield opportunities returned' };
+}
+
+async function writeValidationProof(tool: Awaited<ReturnType<typeof scoreTools>>[number], response: unknown, paymentResponse: unknown, validation: { ok: boolean; reason: string }) {
+  const config = getValidationConfig();
+  const provider = new ethers.JsonRpcProvider(config.rpcUrl);
+  const requester = new ethers.NonceManager(new ethers.Wallet(config.deployerPrivateKey, provider));
+  const validator = new ethers.NonceManager(new ethers.Wallet(config.feedbackPrivateKey, provider));
+  const validationFromRequester = new ethers.Contract(config.validationRegistryAddress, validationAbi, requester);
+  const validationFromValidator = new ethers.Contract(config.validationRegistryAddress, validationAbi, validator);
+  const requestBody = { agentId: tool.agentId, tool: tool.name, endpoint: tool.endpoint, paymentResponse, response, validation };
+  const requestHash = ethers.keccak256(ethers.toUtf8Bytes(stableJson(requestBody)));
+  const responseHash = ethers.keccak256(ethers.toUtf8Bytes(stableJson({ requestHash, ok: validation.ok, reason: validation.reason })));
+  const requestTx = await validationFromRequester.validationRequest(await validator.getAddress(), BigInt(tool.agentId), '', requestHash);
+  const responseTx = await validationFromValidator.validationResponse(requestHash, validation.ok ? 100 : 0, '', responseHash, 'x402-paid-api-response');
+  const [requestReceipt, responseReceipt] = await Promise.all([requestTx.wait(), responseTx.wait()]);
+
+  return {
+    agentId: tool.agentId,
+    name: tool.name,
+    requestHash,
+    responseHash,
+    score: validation.ok ? 100 : 0,
+    tag: 'x402-paid-api-response',
+    requestTxHash: requestReceipt?.hash,
+    responseTxHash: responseReceipt?.hash
+  };
 }
 
 function capabilityMatch(toolCaps: string[], task: string) {
@@ -251,6 +282,7 @@ export async function callPaidTool(origin: string, tool: Awaited<ReturnType<type
 async function writeReputationUpdate(tool: Awaited<ReturnType<typeof scoreTools>>[number], response: unknown, paymentResponse: unknown) {
   const validation = validateDeliveredWork(tool.name, response);
   if (!validation.ok) throw new Error(`Delivered work validation failed for ${tool.name}: ${validation.reason}`);
+  const validationUpdate = await writeValidationProof(tool, response, paymentResponse, validation);
 
   const config = getFeedbackConfig();
   const provider = new ethers.JsonRpcProvider(config.rpcUrl);
@@ -264,6 +296,8 @@ async function writeReputationUpdate(tool: Awaited<ReturnType<typeof scoreTools>
     endpoint: tool.endpoint,
     paymentRef,
     txHash: findTxHash(paymentResponse),
+    validationRequestHash: validationUpdate.requestHash,
+    validationResponseTxHash: validationUpdate.responseTxHash,
     validation,
     ratingValue: 5,
     tag1: 'paid-call',
@@ -282,8 +316,9 @@ async function writeReputationUpdate(tool: Awaited<ReturnType<typeof scoreTools>
     paymentTxHash: findTxHash(paymentResponse),
     successfulCallTxHash: callReceipt?.hash,
     feedbackTxHash: feedbackReceipt?.hash,
+    validationUpdate,
     validation,
-    update: 'Recorded successful paid call and 5/5 feedback on Avalanche Fuji reputation registry.'
+    update: 'Recorded validation, successful paid call, and 5/5 feedback on Avalanche Fuji ERC-8004 registries.'
   };
 }
 
@@ -328,6 +363,7 @@ export async function runAgent(origin: string, task: string, policyInput: Partia
       rejectedTools: [],
       decisionTrace: [],
       payments: [],
+      validationUpdates: [],
       reputationUpdates: [],
       toolResponses: {},
       result: result.text?.trim() || 'Hi. Give me an Avalanche yield or risk task when you want me to spend from the allowance and call paid tools.',
@@ -524,8 +560,8 @@ export async function runAgent(origin: string, task: string, policyInput: Partia
     ? riskResponse.protocols.filter((p: any) => p.riskLabel === 'lower').slice(0, 3).map((p: any) => p.protocol)
     : [];
   const fallbackRecommendation = bestOpportunity
-    ? `Recommendation: ${bestOpportunity.protocol} ${bestOpportunity.symbol} pool.\n\nEstimated APY: ${Number(bestOpportunity.apy || 0).toFixed(2)}%\nTVL checked: $${Number(bestOpportunity.tvlUsd || 0).toLocaleString()}\n\nWhy the agent chose this path:\n- The allowance policy capped spend at ${formatUsdc(allowancePolicy.maxBudgetAtomic)} and required reputation >= ${allowancePolicy.minReputation}/5.\n- AvalancheYieldScout supplied current USDC yield opportunities.\n- RiskOracleMCP cross-checked Avalanche protocol risk signals${lowRiskProtocols.length ? ` including ${lowRiskProtocols.join(', ')}.` : '.'}\n- Rejected providers: ${rejectedToolNames}.\n\nTotal paid: ${formatUsdc(total)} via x402.\nTrust updated: successful paid calls + 5/5 feedback written on Avalanche Fuji.`
-    : `Autonomous flow completed: ${selectedTools.map(tool => tool.name).join(', ')} selected by allowance policy, paid via x402, validated, and reputation was updated on Avalanche Fuji. Rejected providers: ${rejectedToolNames}.`;
+    ? `Recommendation: ${bestOpportunity.protocol} ${bestOpportunity.symbol} pool.\n\nEstimated APY: ${Number(bestOpportunity.apy || 0).toFixed(2)}%\nTVL checked: $${Number(bestOpportunity.tvlUsd || 0).toLocaleString()}\n\nWhy the agent chose this path:\n- The allowance policy capped spend at ${formatUsdc(allowancePolicy.maxBudgetAtomic)} and required reputation >= ${allowancePolicy.minReputation}/5.\n- AvalancheYieldScout supplied current USDC yield opportunities.\n- RiskOracleMCP cross-checked Avalanche protocol risk signals${lowRiskProtocols.length ? ` including ${lowRiskProtocols.join(', ')}.` : '.'}\n- Rejected providers: ${rejectedToolNames}.\n\nTotal paid: ${formatUsdc(total)} via x402.\nTrust updated: validation proof, successful paid calls, and 5/5 feedback written on Avalanche Fuji ERC-8004 registries.`
+    : `Autonomous flow completed: ${selectedTools.map(tool => tool.name).join(', ')} selected by allowance policy, paid via x402, validated, and reputation was updated on Avalanche Fuji ERC-8004 registries. Rejected providers: ${rejectedToolNames}.`;
   const modelText = result.text?.trim();
 
   return {
@@ -549,6 +585,7 @@ export async function runAgent(origin: string, task: string, policyInput: Partia
       network: NETWORK,
       paymentRef: c.reputationUpdate.paymentRef
     })),
+    validationUpdates: paidCalls.map(c => c.reputationUpdate.validationUpdate),
     reputationUpdates: paidCalls.map(c => c.reputationUpdate),
     toolResponses: Object.fromEntries(paidCalls.map(c => [c.tool.name, c.response])),
     result: modelText || fallbackRecommendation,

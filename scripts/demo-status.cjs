@@ -19,9 +19,10 @@ const required = [
   'DEPLOYER_PRIVATE_KEY',
   'FEEDBACK_PRIVATE_KEY',
   'IDENTITY_REGISTRY_ADDRESS',
-  'REPUTATION_REGISTRY_ADDRESS'
+  'REPUTATION_REGISTRY_ADDRESS',
+  'VALIDATION_REGISTRY_ADDRESS'
 ];
-const addresses = new Set(['USDC_ADDRESS', 'CHEAPYIELDBOT_WALLET', 'AVALANCHEYIELDSCOUT_WALLET', 'RISKORACLEMCP_WALLET', 'IDENTITY_REGISTRY_ADDRESS', 'REPUTATION_REGISTRY_ADDRESS']);
+const addresses = new Set(['USDC_ADDRESS', 'CHEAPYIELDBOT_WALLET', 'AVALANCHEYIELDSCOUT_WALLET', 'RISKORACLEMCP_WALLET', 'IDENTITY_REGISTRY_ADDRESS', 'REPUTATION_REGISTRY_ADDRESS', 'VALIDATION_REGISTRY_ADDRESS']);
 const privateKeys = new Set(['BUYER_PRIVATE_KEY', 'DEPLOYER_PRIVATE_KEY', 'FEEDBACK_PRIVATE_KEY']);
 const secrets = new Set([...privateKeys, 'OPENAI_API_KEY']);
 const urls = new Set(['NEXT_PUBLIC_APP_URL', 'AVALANCHE_FUJI_RPC', 'X402_FACILITATOR_URL']);
@@ -74,14 +75,15 @@ async function main() {
     console.log(`${balance > 0n ? '✅' : '⚠️ '} ${label} ${wallet.address} AVAX balance: ${ethers.formatEther(balance)}`);
   }
 
-  for (const [label, address] of [['USDC/token', process.env.USDC_ADDRESS], ['identity registry', process.env.IDENTITY_REGISTRY_ADDRESS], ['reputation registry', process.env.REPUTATION_REGISTRY_ADDRESS]]) {
+  for (const [label, address] of [['USDC/token', process.env.USDC_ADDRESS], ['identity registry', process.env.IDENTITY_REGISTRY_ADDRESS], ['reputation registry', process.env.REPUTATION_REGISTRY_ADDRESS], ['validation registry', process.env.VALIDATION_REGISTRY_ADDRESS]]) {
     const code = await provider.getCode(address);
     console.log(`${code !== '0x' ? '✅' : '❌'} ${label} has contract code at ${address}`);
     if (code === '0x') process.exitCode = 1;
   }
 
   const identityAbi = ['function nextAgentId() view returns (uint256)', 'function getAgentURI(uint256) view returns (string)'];
-  const repAbi = ['function getReputation(uint256) view returns (uint256,uint256,int256,uint256)'];
+  const repAbi = ['function getIdentityRegistry() view returns (address)', 'function getReputation(uint256) view returns (uint256,uint256,int256,uint256)', 'function getClients(uint256) view returns (address[])'];
+  const validationAbi = ['function getIdentityRegistry() view returns (address)', 'function getSummary(uint256,address[],string) view returns (uint64,uint8)'];
   try {
     const identity = new ethers.Contract(process.env.IDENTITY_REGISTRY_ADDRESS, identityAbi, provider);
     const nextAgentId = await identity.nextAgentId();
@@ -93,12 +95,22 @@ async function main() {
   }
   try {
     const rep = new ethers.Contract(process.env.REPUTATION_REGISTRY_ADDRESS, repAbi, provider);
+    const repIdentity = await rep.getIdentityRegistry();
+    console.log(`${repIdentity.toLowerCase() === process.env.IDENTITY_REGISTRY_ADDRESS.toLowerCase() ? '✅' : '❌'} reputation registry identity link: ${repIdentity}`);
     for (let i = 1; i <= 3; i++) {
       const [ok, failed, total, count] = await rep.getReputation(i);
       console.log(`✅ reputation ${i}: successful=${ok} failed=${failed} totalRating=${total} ratingCount=${count}`);
     }
   } catch (error) {
     console.log('❌ reputation registry read failed:', error.message);
+    process.exitCode = 1;
+  }
+  try {
+    const validation = new ethers.Contract(process.env.VALIDATION_REGISTRY_ADDRESS, validationAbi, provider);
+    const validationIdentity = await validation.getIdentityRegistry();
+    console.log(`${validationIdentity.toLowerCase() === process.env.IDENTITY_REGISTRY_ADDRESS.toLowerCase() ? '✅' : '❌'} validation registry identity link: ${validationIdentity}`);
+  } catch (error) {
+    console.log('❌ validation registry read failed:', error.message);
     process.exitCode = 1;
   }
 
