@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="public/branding_transparent.png">
+  <img alt="AgentPay" src="public/branding_transparent.png">
+</picture>
+
 # AgentPay
 
 AgentPay lets AI agents safely buy paid APIs with spending limits. OpenAI chooses the tools, policy checks approve spend, x402 handles payment, and Avalanche Fuji records receipts and reputation proof.
