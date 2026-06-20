@@ -1,6 +1,6 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/branding_transparent.png">
-  <img alt="AgentPay" src="public/branding_transparent.png">
+  <source media="(prefers-color-scheme: dark)" srcset="public/branding_dark.png">
+  <img alt="AgentPay" src="public/branding_dark.png">
 </picture>
 
 # AgentPay
