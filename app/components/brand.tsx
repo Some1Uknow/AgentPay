@@ -58,7 +58,7 @@ export function AppFooter() {
   return (
     <footer className="app-footer">
       <Image className="footer-brand-image" src="/branding_dark.png" alt="AgentPay" width={300} height={100} />
-      <p>AI agents pay tools with x402 and write reputation on Avalanche.</p>
+      <p>AI agents pay tools with x402 and write ERC-8004 trust records on Avalanche.</p>
       <div>
         <Link href="/agent">Demo</Link>
         <Link href="/registry">Registry</Link>

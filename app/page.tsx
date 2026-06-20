@@ -14,9 +14,9 @@ export default function Home() {
 
       <section className="premium-hero">
         <div className="hero-text">
-          <div className="badge-row"><ProtocolBadge type="avax" label="Avalanche Fuji" /><ProtocolBadge type="x402" label="x402 payments" /><ProtocolBadge type="erc8004" label="agent reputation" /></div>
+          <div className="badge-row"><ProtocolBadge type="avax" label="Avalanche Fuji" /><ProtocolBadge type="x402" label="x402 payments" /><ProtocolBadge type="erc8004" label="ERC-8004 trust" /></div>
           <h1>Safe API spending for AI agents.</h1>
-          <p>AgentPay lets an AI agent buy paid APIs without getting a blank check. You set the budget and rules, the agent chooses tools, x402 pays, and Avalanche records proof.</p>
+          <p>AgentPay lets an AI agent buy paid APIs without getting a blank check. You set the budget and rules, the agent chooses tools, x402 pays, and ERC-8004 records identity, validation, and reputation on Avalanche.</p>
           <div className="hero-ctas"><Link className="primary-button big" href="/agent">Open agent console</Link><Link className="secondary-button" href="/registry">View paid APIs</Link></div>
         </div>
         <AnimatedHeroConversation />
@@ -26,7 +26,7 @@ export default function Home() {
         <Stat value="0.10" label="USDC allowance" />
         <Stat value="x402" label="API payments" />
         <Stat value="Fuji" label="testnet proof" />
-        <Stat value="5/5" label="tool reputation" />
+        <Stat value="ERC-8004" label="agent trust" />
       </section>
 
       <section className="premium-section">
@@ -35,7 +35,7 @@ export default function Home() {
           <Step n="01" icon={<Database />} title="APIs list prices" body="Each paid API publishes what it does, what it costs, and where payment goes." />
           <Step n="02" icon={<Search />} title="The agent picks" body="OpenAI decides which API is useful for the task instead of calling everything." />
           <Step n="03" icon={<Zap />} title="x402 pays" body="If the API passes policy, the agent sends a real testnet payment." />
-          <Step n="04" icon={<CheckCircle2 />} title="Proof is saved" body="The app shows receipts and writes reputation for successful API work." />
+          <Step n="04" icon={<CheckCircle2 />} title="Proof is saved" body="The app shows receipts, validates the work, and writes reputation for successful API calls." />
         </div>
       </section>
 
@@ -53,15 +53,15 @@ export default function Home() {
         <div className="section-copy"><span>For builders</span><h2>Turn an API into something agents can pay for.</h2><p>API providers get a simple paid endpoint. Agent operators get policy, receipts, and reputation in one place.</p></div>
         <div className="step-grid">
           <Step n="API" icon={<Zap />} title="Paid API access" body="HTTP 402 asks for payment before the endpoint responds." />
-          <Step n="ID" icon={<Database />} title="Tool identity" body="The API advertises its wallet, price, endpoint, and capabilities." />
-          <Step n="REP" icon={<CheckCircle2 />} title="Reputation" body="Good paid work improves the provider's score." />
+          <Step n="ID" icon={<Database />} title="ERC-8004 identity" body="The API advertises its wallet, price, endpoint, capabilities, and onchain identity." />
+          <Step n="REP" icon={<CheckCircle2 />} title="Validation and reputation" body="Good paid work is validated, then improves the provider's score." />
           <Step n="UX" icon={<ShieldCheck />} title="Operator console" body="The user sees the agent's answer and the payment proof together." />
         </div>
       </section>
 
       <section className="premium-section final-cta-section">
         <div className="final-cta-card">
-          <div><span>Fuji demo</span><h2>Try an agent that buys APIs with a spending limit.</h2><p>Ask for an Avalanche yield task. The agent chooses paid APIs, spends testnet USDC through x402, and shows the proof.</p></div>
+          <div><span>Fuji demo</span><h2>Try an agent that buys APIs with a spending limit.</h2><p>Ask for an Avalanche yield task. The agent chooses paid APIs, spends testnet USDC through x402, and shows ERC-8004 trust proof.</p></div>
           <Link className="primary-button big" href="/agent">Open agent console <ArrowRight size={16} /></Link>
         </div>
       </section>

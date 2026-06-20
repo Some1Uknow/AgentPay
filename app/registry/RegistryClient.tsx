@@ -29,11 +29,11 @@ export default function RegistryClient({ initialAgents, initialError = null }: {
         <div>
           <span>Tool registry</span>
           <h1>Paid tools your agent can hire.</h1>
-          <p>Live x402 providers with spend limits, wallets, prices, capabilities, and reputation records on Avalanche Fuji.</p>
+          <p>Live x402 providers with wallets, prices, capabilities, ERC-8004 identity, validation, and reputation records on Avalanche Fuji.</p>
         </div>
         <div className="registry-status-stack">
           <div className="registry-status-card"><ShieldCheck size={17} /><strong>{agents.length}</strong><span>registered providers</span></div>
-          <div className="badge-row"><ProtocolBadge type="avax" label="Fuji" /><ProtocolBadge type="usdc" label="USDC" /><ProtocolBadge type="erc8004" label="Reputation" /></div>
+          <div className="badge-row"><ProtocolBadge type="avax" label="Fuji" /><ProtocolBadge type="usdc" label="USDC" /><ProtocolBadge type="erc8004" label="ERC-8004" /></div>
         </div>
       </section>
       <section className="registry-toolbar">
@@ -59,7 +59,7 @@ function RegistryCard({ agent }: { agent: AnyObj }) {
       <div className="token-row"><span><UsdcLogo /> {agent.pricing?.display}</span><span><AvalancheLogo /> Avalanche Fuji</span></div>
       <div className="rating-row"><strong>{score ? score.toFixed(1) : 'New'}</strong><span>{score ? 'rated reputation' : 'No rating yet'} · {rep.successfulCalls || 0} successful calls</span></div>
       <div className="capability-list premium-caps">{(agent.capabilities || []).map((cap: string) => <span key={cap}>{cap}</span>)}</div>
-      <div className="metadata-grid"><Meta label="x402 endpoint" value={agent.endpoint} /><Meta label="seller wallet" value={agent.wallet} href={snowtraceAddress(agent.wallet)} /><Meta label="asset" value={agent.pricing?.asset} href={snowtraceAddress(agent.pricing?.asset)} /><Meta label="agent URI" value={agent.agentURI} /></div>
+      <div className="metadata-grid"><Meta label="x402 endpoint" value={agent.endpoint} /><Meta label="seller wallet" value={agent.wallet} href={snowtraceAddress(agent.wallet)} /><Meta label="asset" value={agent.pricing?.asset} href={snowtraceAddress(agent.pricing?.asset)} /><Meta label="ERC-8004 identity URI" value={agent.agentURI} /></div>
     </article>
   );
 }
